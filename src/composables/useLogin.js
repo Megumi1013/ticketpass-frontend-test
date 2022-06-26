@@ -32,7 +32,7 @@ const postLoginApi = async () => {
 
   } catch (error) {
 
-    authState.error = error.response?.data?.message
+    authState.error = error.response?.data?.message || 'Unknown Error'
 
   } finally {
 
@@ -55,7 +55,7 @@ const postRefreshTokenApi = async () => {
 
   } catch (error) {
 
-    authState.error = error.response?.data?.message
+    authState.error = error.response?.data?.message || 'Unknown Error'
 
   } finally {
 

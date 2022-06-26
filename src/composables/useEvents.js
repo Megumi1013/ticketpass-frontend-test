@@ -3,6 +3,8 @@ import { reactive } from "vue"
 import { useStore } from "@/store"
 import router from "@/router"
 
+const store = useStore()
+
 const eventsState = reactive({
   events: [],
   eventDetail: null,
@@ -32,7 +34,7 @@ const getEventsApi = async () => {
 
   } catch (error) {
 
-    eventsState.error = error.response?.data?.message
+    eventsState.error = error.response?.data?.message || 'Unknown Error'
 
   } finally {
 
@@ -51,7 +53,7 @@ const getEventDetailApi = async (id) => {
 
   } catch (error) {
 
-    eventsState.error = error.response?.data?.message
+    eventsState.error = error.response?.data?.message || 'Unknown Error'
 
   } finally {
 
@@ -60,15 +62,13 @@ const getEventDetailApi = async (id) => {
   }
 }
 
-const { accessToken } = useStore()
-
 const createEventApi = async () => {
 
   try {
     eventsState.loading = true
 
     const headers = {
-      Authorization: "Bearer " + accessToken,
+      Authorization: "Bearer " + store.accessToken,
     }
 
     const response = await postEvent(eventsState.form, { headers: headers })
@@ -88,7 +88,7 @@ const createEventApi = async () => {
 
   } catch (error) {
 
-    eventsState.error = error.response?.data?.message
+    eventsState.error = error.response?.data?.message || 'Unknown Error'
 
   } finally {
 

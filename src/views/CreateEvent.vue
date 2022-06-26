@@ -16,15 +16,24 @@
 
             <input
               id="event-name"
-              class="appearance-none rounded-full w-full h-12 px-5 text-secondary bg-light-gray leading-tight focus:outline-primary"
+              v-model="state.form.name"
+              class="border-2 border-gray-200 appearance-none rounded-full w-full h-12 px-5 text-secondary leading-tight focus:outline-primary"
+              :class="{ 'border-red': eventsState?.errors?.name || v$.name.$error }"
               type="text"
               autocomplete="off"
               placeholder="Event name"
-              @change="eventsState.form.append('name', $event.target.value)"
+              @blur="v$.name.$touch"
             >
 
             <div
-              v-if="eventsState?.errors?.name"
+              v-if="v$.name.$error"
+              class="text-red mt-2 text-sm text-left"
+            >
+              The name field is required.
+            </div>
+
+            <div
+              v-if="eventsState?.errors?.name && !v$.name.$error"
               class="text-red mt-2 text-sm text-left"
             >
               {{ eventsState.errors.name[0] }}
@@ -43,14 +52,23 @@
 
                 <input
                   id="start-date"
-                  class="appearance-none rounded-full w-full h-12 px-5 text-secondary bg-light-gray leading-tight focus:outline-primary"
+                  v-model="state.form.startDate"
+                  class="border-2 border-gray-200 appearance-none rounded-full w-full h-12 px-5 text-secondary leading-tight focus:outline-primary"
+                  :class="{ 'border-red': eventsState?.errors?.startDate || v$.startDate.$error }"
                   type="date"
                   autocomplete="off"
-                  @change="eventsState.form.append('startDate', dayjsFormatToUnix($event.target.value))"
+                  @blur="v$.startDate.$touch"
                 >
 
                 <div
-                  v-if="eventsState?.errors?.startDate"
+                  v-if="v$.startDate.$error"
+                  class="text-red mt-2 text-sm text-left"
+                >
+                  The start date field is required.
+                </div>
+
+                <div
+                  v-if="eventsState?.errors?.startDate && !v$.startDate.$error"
                   class="text-red mt-2 text-sm text-left"
                 >
                   {{ eventsState.errors.startDate[0] }}
@@ -67,14 +85,23 @@
 
                 <input
                   id="end-date"
-                  class="appearance-none rounded-full w-full h-12 px-5 text-secondary bg-light-gray leading-tight focus:outline-primary"
+                  v-model="state.form.endDate"
+                  class="border-2 border-gray-200 appearance-none rounded-full w-full h-12 px-5 text-secondary leading-tight focus:outline-primary"
+                  :class="{ 'border-red': eventsState?.errors?.endDate || v$.endDate.$error }"
                   type="date"
                   autocomplete="off"
-                  @change="eventsState.form.append('endDate', dayjsFormatToUnix($event.target.value))"
+                  @blur="v$.endDate.$touch"
                 >
 
                 <div
-                  v-if="eventsState?.errors?.endDate"
+                  v-if="v$.endDate.$error"
+                  class="text-red mt-2 text-sm text-left"
+                >
+                  The end date field is required.
+                </div>
+
+                <div
+                  v-if="eventsState?.errors?.endDate && !v$.endDate.$error"
                   class="text-red mt-2 text-sm text-left"
                 >
                   {{ eventsState.errors.endDate[0] }}
@@ -93,15 +120,24 @@
 
             <textarea
               id="event-description"
-              class="appearance-none rounded-lg w-full h-40 py-4 px-5 text-secondary bg-light-gray leading-tight focus:outline-primary"
+              v-model="state.form.description"
+              class="border-2 border-gray-200 appearance-none rounded-lg w-full h-40 py-4 px-5 text-secondary leading-tight focus:outline-primary"
+              :class="{ 'border-red': eventsState?.errors?.description || v$.description.$error }"
               type="text"
               autocomplete="off"
               placeholder="Event description"
-              @change="eventsState.form.append('description', $event.target.value)"
+              @blur="v$.description.$touch"
             />
 
             <div
-              v-if="eventsState?.errors?.description"
+              v-if="v$.description.$error"
+              class="text-red mt-2 text-sm text-left"
+            >
+              The description field is required.
+            </div>
+
+            <div
+              v-if="eventsState?.errors?.description && !v$.description.$error"
               class="text-red mt-2 text-sm text-left"
             >
               {{ eventsState.errors.description[0] }}
@@ -123,7 +159,8 @@
             >
               <label
                 for="event-image"
-                class="p-6 relative flex flex-col justify-center items-center w-full h-48 rounded-lg border-2 border-gray border-dashed cursor-pointer hover:bg-light-gray"
+                class="p-6 relative flex flex-col justify-center items-center w-full h-48 rounded-lg border-2 border-gray-200 border-dashed cursor-pointer hover:bg-light-gray"
+                :class="{ 'border-red': eventsState?.errors?.image || v$.image.$error }"
               >
                 <span class="flex flex-col justify-center items-center pt-5 pb-6">
                   <svg
@@ -161,7 +198,14 @@
             </div>
 
             <div
-              v-if="eventsState?.errors?.image"
+              v-if="v$.image.$error"
+              class="text-red mt-2 text-sm text-left"
+            >
+              The image field is required.
+            </div>
+
+            <div
+              v-if="eventsState?.errors?.image && !v$.image.$error"
               class="text-red mt-2 text-sm text-left"
             >
               {{ eventsState.errors.image[0] }}
@@ -185,9 +229,11 @@
 </template>
 
 <script setup>
-  import { onMounted, ref } from "vue"
+  import { onMounted, ref, reactive, watch } from "vue"
   import { eventsState, createEventApi } from "@/composables/useEvents"
   import { dayjsFormatToUnix } from "@/helpers"
+  import useVuelidate from "@vuelidate/core"
+  import { required } from "@vuelidate/validators"
 
   const imageDragEnter = ref(false)
   const imageDragLeave = ref(false)
@@ -206,6 +252,26 @@
 
   })
 
+  const state = reactive({
+    form: {
+      name: "",
+      description: "",
+      startDate: "",
+      endDate: "",
+      image: null,
+    }
+  })
+
+  const rules = {
+    name: { required },
+    description: { required },
+    startDate: { required },
+    endDate: { required },
+    image: { required },
+  }
+
+  const v$ = useVuelidate(rules, state.form)
+
   const preventDefaults = (e) => {
 
     e.preventDefault()
@@ -213,19 +279,49 @@
 
   }
 
+  watch(
+    () => state.form,
+    () => {
+
+      if (!v$.value.$invalid) {
+
+        eventsState.form.append('name', state.form.name)
+        eventsState.form.append('startDate', dayjsFormatToUnix(state.form.startDate))
+        eventsState.form.append('endDate', dayjsFormatToUnix(state.form.endDate))
+        eventsState.form.append('description', state.form.description)
+
+      }
+
+    },
+    { deep: true }
+  )
+
   const onSubmit = () => {
 
-    createEventApi(eventsState.form)
+    v$.value.$touch()
+
+    if (!v$.value.$invalid) {
+      createEventApi(eventsState.form)
+    }
 
   }
 
   const onChangeFile = (e) => {
 
+    v$.value.image.$touch()
+
     const files = e.target.files || e.dataTransfer.files
 
-    if (!files.length) return
+    if (!files.length) {
+
+      eventsState.form.delete("image")
+      state.form.image = null
+      return
+
+    }
 
     eventsState.form.append("image", files[0], files[0].name)
+    state.form.image = files[0].name
     imageFilename.value = files[0].name
 
   }
