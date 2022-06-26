@@ -25,12 +25,21 @@
 
           <input
             id="email"
-            class="appearance-none rounded-full w-full h-12 px-5 text-secondary bg-light-gray leading-tight focus:outline-primary"
+            v-model="state.form.username"
+            class="border-2 border-gray-200 appearance-none rounded-full w-full h-12 px-5 text-secondary leading-tight focus:outline-primary"
+            :class="{ 'border-red': loginState?.errors?.username || v$.username.$error }"
             type="email"
             autocomplete="email"
             placeholder="Email address"
-            @change="authState.form.append('username', $event.target.value)"
+            @blur="v$.username.$touch"
           >
+
+          <div
+            v-if="v$.username.$error"
+            class="text-red mt-2 text-sm text-left"
+          >
+            The email field is required.
+          </div>
         </div>
 
         <div class="mb-0">
@@ -43,18 +52,27 @@
 
           <input
             id="password"
-            class="appearance-none rounded-full w-full h-12 px-5 text-secondary bg-light-gray mb-3 leading-tight focus:outline-primary"
+            v-model="state.form.password"
+            class="border-2 border-gray-200 appearance-none rounded-full w-full h-12 px-5 text-secondary mb-3 leading-tight focus:outline-primary"
+            :class="{ 'border-red': loginState?.errors?.password || v$.password.$error }"
             type="password"
             autocomplete="current-password"
             placeholder="Password"
-            @change="authState.form.append('password', $event.target.value)"
+            @blur="v$.password.$touch"
           >
+
+          <div
+            v-if="v$.password.$error"
+            class="text-red mt-2 text-sm text-left"
+          >
+            The password field is required.
+          </div>
         </div>
       </form>
     </div>
 
     <div class="text-red mb-8">
-      {{ authState.error }}
+      {{ loginState.error }}
     </div>
 
     <button
@@ -68,31 +86,61 @@
 </template>
 
 <script setup>
-  import { authState, postLoginApi } from "@/composables/useLogin"
+  import { loginState, postLoginApi } from "@/composables/useLogin"
   import { useRouter } from "vue-router"
-  import { onMounted } from "vue"
+  import { onMounted, reactive, watch } from "vue"
+  import useVuelidate from "@vuelidate/core"
+  import { required } from "@vuelidate/validators"
 
   const router = useRouter()
 
   onMounted(() => {
 
-    authState.form = new FormData()
+    loginState.form = new FormData()
 
   })
 
+  const state = reactive({
+    form: {
+      username: "",
+      password: ""
+    }
+  })
+
+  const rules = {
+    username: { required },
+    password: { required }
+  }
+
+  const v$ = useVuelidate(rules, state.form)
+
+  watch(
+    () => state.form,
+    () => {
+
+      if (!v$.value.$invalid) {
+
+      loginState.form.append('username', state.form.username)
+      loginState.form.append('password', state.form.password)
+
+      }
+    },
+    { deep: true }
+  )
+
+
   const onLogin = async () => {
 
-    await postLoginApi(authState.form)
+    if (!v$.value.$invalid) {
 
-    if (authState.isSuccess) {
+      await postLoginApi(loginState.form)
+
+    }
+
+    if (loginState.isSuccess) {
 
       await router.push({ name: "CreateEvent" })
 
     }
   }
-
 </script>
-
-<style>
-
-</style>

@@ -5,7 +5,7 @@ import router from "@/router"
 
 const store = useStore()
 
-const authState = reactive({
+const loginState = reactive({
   loading: false,
   error: "",
   form: {},
@@ -16,27 +16,27 @@ const authState = reactive({
 const postLoginApi = async () => {
 
   try {
-    authState.loading = true
+    loginState.loading = true
 
-    authState.form.append("grant_type", "password")
-    authState.form.append("client_id", process.env.VUE_APP_CLIENT_ID)
+    loginState.form.append("grant_type", "password")
+    loginState.form.append("client_id", process.env.VUE_APP_CLIENT_ID)
     // It should be real client id in real world?
 
-    const response = await postLogin(authState.form)
+    const response = await postLogin(loginState.form)
 
     store.isLoggedIn = true
     store.accessToken = response.data?.access_token
     store.refreshToken = response.data?.refresh_token
 
-    authState.isSuccess = true
+    loginState.isSuccess = true
 
   } catch (error) {
 
-    authState.error = error.response?.data?.message || 'Unknown Error'
+    loginState.error = error.response?.data?.message || 'Unknown Error'
 
   } finally {
 
-    authState.loading = false
+    loginState.loading = false
 
   }
 }
@@ -44,22 +44,22 @@ const postLoginApi = async () => {
 const postRefreshTokenApi = async () => {
 
   try {
-    authState.loading = true
+    loginState.loading = true
 
-    authState.refreshTokenParams = new FormData()
-    authState.refreshTokenParams.append("grant_type", "refresh_token")
-    authState.refreshTokenParams.append("client_id", process.env.VUE_APP_CLIENT_ID)
-    authState.refreshTokenParams.append("refresh_token", store.refreshToken)
+    loginState.refreshTokenParams = new FormData()
+    loginState.refreshTokenParams.append("grant_type", "refresh_token")
+    loginState.refreshTokenParams.append("client_id", process.env.VUE_APP_CLIENT_ID)
+    loginState.refreshTokenParams.append("refresh_token", store.refreshToken)
 
-    await postRefreshToken(authState.refreshTokenParams)
+    await postRefreshToken(loginState.refreshTokenParams)
 
   } catch (error) {
 
-    authState.error = error.response?.data?.message || 'Unknown Error'
+    loginState.error = error.response?.data?.message || 'Unknown Error'
 
   } finally {
 
-    authState.loading = false
+    loginState.loading = false
 
   }
 }
@@ -75,7 +75,7 @@ const logout = () => {
 }
 
 export {
-  authState,
+  loginState,
   postLoginApi,
   postRefreshTokenApi,
   logout,
