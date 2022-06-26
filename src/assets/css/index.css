@@ -6,6 +6,34 @@ body {
     text-align: center;
 }
 
+.ticketpass-notification {
+
+    margin: 1rem;
+    padding: 1rem;
+    color: #ffffff;
+    border-radius: 0.75rem;
+    border: none;
+    font-size: 16px;
+
+    background: theme('colors.secondary');
+    border-left: 5px solid theme('colors.secondary');
+}
+
+.ticketpass-notification.success {
+    background: theme('colors.primary');
+    border-left-color: theme('colors.primary');
+}
+
+.ticketpass-notification.warn {
+    background: #ffb648;
+    border-left-color: #ffb648;
+}
+
+.ticketpass-notification.error {
+    background: theme('colors.red');
+    border-left-color: theme('colors.red');
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

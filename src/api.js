@@ -1,5 +1,6 @@
 import axios from "axios"
 import { logout } from "@/composables/useLogin"
+import { notify } from "@kyvg/vue3-notification"
 
 const api = axios.create({
   baseURL: process.env.VUE_APP_API_URL,
@@ -15,10 +16,22 @@ api.interceptors.response.use(response => {
 
 }, error => {
 
-  if ([401].includes(error.response.statusCode)) {
+  console.error(error)
+
+  if ([401].includes(error.response.status)) {
 
     logout()
     return
+
+  }
+
+  if ([500,429,502].includes(error.response.status)) {
+
+    notify({
+      title: "API Error",
+      type: "error",
+      text: error.response?.message || error.response?.data?.message || "Unknown Error",
+    })
 
   }
 
