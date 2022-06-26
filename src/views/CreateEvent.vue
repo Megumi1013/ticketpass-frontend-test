@@ -1,6 +1,4 @@
 <template>
-  <BasicHeader />
-
   <main class="px-6 md:px-20 py-12">
     <div class="flex flex-col items-center">
       <div class="w-full flex-col max-w-sm sm:max-w-md">
@@ -190,7 +188,6 @@
   import { onMounted, ref } from "vue"
   import { eventsState, createEventApi } from "@/composables/useEvents"
   import { dayjsFormatToUnix } from "@/helpers"
-  import BasicHeader from "@/components/BasicHeader.vue"
 
   const imageDragEnter = ref(false)
   const imageDragLeave = ref(false)

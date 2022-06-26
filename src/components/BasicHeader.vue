@@ -1,6 +1,6 @@
 <template>
   <nav class="sm:flex items-center justify-between flex-wrap px-6 py-4 shadow-lg shadow-gray-100">
-    <div class="flex items-center flex-shrink-0 lg:mr-6">
+    <div class="sm:flex items-center flex-shrink-0 lg:mr-6">
       <router-link :to="{ name: 'EventsList' }">
         <img
           class="w-36 rounded-full mx-auto"
@@ -39,8 +39,10 @@
 <script setup>
   import { useStore } from "@/store"
   import { logout } from "@/composables/useLogin"
+  import { storeToRefs } from "pinia"
 
-  const { isLoggedIn } = useStore()
+  const store = useStore()
+  const { isLoggedIn } = storeToRefs(store)
 
   const onLogout = () => {
 
